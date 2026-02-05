@@ -9,7 +9,7 @@
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
- import { Scale, Ruler, Target, Wallet, Utensils, ArrowRight, ArrowLeft, Check } from "lucide-react";
+ import { Scale, Ruler, Target, Wallet, Utensils, ArrowRight, ArrowLeft, Check, X } from "lucide-react";
  import { getCurrencySymbol } from "@/lib/currency";
  
  interface OnboardingModalProps {
@@ -70,13 +70,32 @@
      }
    };
  
-   return (
-     <Dialog open={open}>
-       <DialogContent className="sm:max-w-md glass-card border-primary/20" onPointerDownOutside={(e) => e.preventDefault()}>
-         <DialogHeader>
-           <DialogTitle className="text-2xl">{steps[step].title}</DialogTitle>
-           <DialogDescription>{steps[step].description}</DialogDescription>
-         </DialogHeader>
+  const handleSkip = () => {
+    // Complete with default values
+    onComplete({
+      fullName: data.fullName || "User",
+      weight: data.weight || "",
+      height: data.height || "",
+      goalWeight: data.goalWeight || "",
+      calorieGoal: data.calorieGoal || "2000",
+      budgetGoal: data.budgetGoal || "0",
+    });
+  };
+
+  return (
+    <Dialog open={open}>
+      <DialogContent className="sm:max-w-md glass-card border-primary/20" onPointerDownOutside={(e) => e.preventDefault()}>
+        <button
+          onClick={handleSkip}
+          className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <DialogHeader>
+          <DialogTitle className="text-2xl">{steps[step].title}</DialogTitle>
+          <DialogDescription>{steps[step].description}</DialogDescription>
+        </DialogHeader>
  
          {/* Progress indicator */}
          <div className="flex gap-2 my-4">
