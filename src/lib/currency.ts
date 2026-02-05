@@ -18,19 +18,21 @@
  // Default currency - can be changed based on user location/preference
  export const defaultCurrency: CurrencyCode = "INR";
  
- export const formatCurrency = (
-   amount: number,
-   currencyCode: CurrencyCode = defaultCurrency
- ): string => {
-   const config = currencies[currencyCode];
-   return new Intl.NumberFormat(config.locale, {
-     style: "currency",
-     currency: config.code,
-     minimumFractionDigits: 0,
-     maximumFractionDigits: 2,
-   }).format(amount);
- };
+export const formatCurrency = (
+  amount: number,
+  currencyCode: CurrencyCode | string = defaultCurrency
+): string => {
+  const code = (currencyCode in currencies ? currencyCode : defaultCurrency) as CurrencyCode;
+  const config = currencies[code];
+  return new Intl.NumberFormat(config.locale, {
+    style: "currency",
+    currency: config.code,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(amount);
+};
  
- export const getCurrencySymbol = (currencyCode: CurrencyCode = defaultCurrency): string => {
-   return currencies[currencyCode].symbol;
- };
+export const getCurrencySymbol = (currencyCode: CurrencyCode | string = defaultCurrency): string => {
+  const code = (currencyCode in currencies ? currencyCode : defaultCurrency) as CurrencyCode;
+  return currencies[code].symbol;
+};
