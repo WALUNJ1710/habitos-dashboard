@@ -8,6 +8,7 @@
  import { Switch } from "@/components/ui/switch";
  import { useToast } from "@/hooks/use-toast";
  import { User, Target, Wallet, Sun, Moon, LogOut, Save } from "lucide-react";
+ import { getCurrencySymbol } from "@/lib/currency";
  
  const Settings = () => {
    const { profile: userProfile, setProfile: setUserProfile } = useUserProfile();
@@ -130,7 +131,7 @@
              />
            </div>
            <div className="space-y-2">
-             <Label htmlFor="budgetGoal">Monthly Budget Goal ($)</Label>
+             <Label htmlFor="budgetGoal">Monthly Budget Goal ({getCurrencySymbol()})</Label>
              <Input
                id="budgetGoal"
                type="number"

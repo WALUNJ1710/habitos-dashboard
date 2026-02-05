@@ -1,4 +1,5 @@
  import { useUserProfile } from "@/components/dashboard/DashboardLayout";
+ import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
  import { useState } from "react";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -124,7 +125,7 @@
              </div>
              <p className="text-sm text-muted-foreground">Total Budget</p>
            </div>
-           <p className="text-3xl font-bold">${totalBudget.toLocaleString()}</p>
+           <p className="text-3xl font-bold">{formatCurrency(totalBudget)}</p>
            <p className="text-sm text-muted-foreground">Monthly</p>
          </div>
          <div className="glass-card rounded-xl p-5">
@@ -134,8 +135,8 @@
              </div>
              <p className="text-sm text-muted-foreground">Money Spent</p>
            </div>
-           <p className="text-3xl font-bold">${totalSpent.toLocaleString()}</p>
-           <p className="text-sm text-muted-foreground">{((totalSpent / totalBudget) * 100).toFixed(0)}% of budget</p>
+           <p className="text-3xl font-bold">{formatCurrency(totalSpent)}</p>
+           <p className="text-sm text-muted-foreground">{totalBudget > 0 ? ((totalSpent / totalBudget) * 100).toFixed(0) : 0}% of budget</p>
          </div>
          <div className={cn(
            "glass-card rounded-xl p-5",
@@ -151,7 +152,7 @@
              <p className="text-sm text-muted-foreground">Remaining</p>
            </div>
            <p className={cn("text-3xl font-bold", remaining > 0 ? "text-success" : "text-destructive")}>
-             ${remaining.toLocaleString()}
+             {formatCurrency(remaining)}
            </p>
            <p className="text-sm text-muted-foreground">{remaining > 0 ? "Keep it up!" : "Over budget!"}</p>
          </div>
@@ -162,7 +163,7 @@
          <h3 className="font-semibold mb-4">Add Expense</h3>
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
            <div className="space-y-2">
-             <Label>Amount ($)</Label>
+             <Label>Amount ({getCurrencySymbol()})</Label>
              <Input
                type="number"
                placeholder="0.00"
@@ -261,7 +262,7 @@
                      border: "1px solid hsl(217, 33%, 22%)",
                      borderRadius: "8px",
                    }}
-                   formatter={(value: number) => [`$${value}`, "Amount"]}
+                   formatter={(value: number) => [formatCurrency(value), "Amount"]}
                  />
                  <Legend />
                </PieChart>
@@ -284,7 +285,7 @@
                      border: "1px solid hsl(217, 33%, 22%)",
                      borderRadius: "8px",
                    }}
-                   formatter={(value: number) => [`$${value}`, "Spent"]}
+                   formatter={(value: number) => [formatCurrency(value), "Spent"]}
                  />
                  <Bar dataKey="amount" fill="hsl(217, 91%, 60%)" radius={[4, 4, 0, 0]} />
                </BarChart>
@@ -320,7 +321,7 @@
                      </div>
                    </div>
                  </div>
-                 <p className="text-lg font-semibold text-destructive">-${expense.amount}</p>
+               <p className="text-lg font-semibold text-destructive">-{formatCurrency(expense.amount)}</p>
                </div>
              );
            })}
