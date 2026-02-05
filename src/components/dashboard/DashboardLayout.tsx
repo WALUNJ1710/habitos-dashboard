@@ -15,21 +15,25 @@ export const DashboardLayout = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const checkOnboarding = async (userId: string) => {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("onboarding_completed")
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      // Only show onboarding if explicitly not completed
+      if (profile && profile.onboarding_completed === false) {
+        setShowOnboarding(true);
+      }
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       setUser(session?.user ?? null);
       setLoading(false);
       
       if (session?.user) {
-        // Check if profile exists and has been set up
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
-        if (!profile?.full_name) {
-          setShowOnboarding(true);
-        }
+        await checkOnboarding(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -40,15 +44,7 @@ export const DashboardLayout = () => {
       setLoading(false);
       
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("user_id", session.user.id)
-          .maybeSingle();
-
-        if (!profile?.full_name) {
-          setShowOnboarding(true);
-        }
+        await checkOnboarding(session.user.id);
       } else {
         navigate("/auth");
       }
@@ -69,6 +65,7 @@ export const DashboardLayout = () => {
         goal_weight: parseFloat(data.goalWeight) || null,
         calorie_goal: parseInt(data.calorieGoal) || 2000,
         budget_goal: parseFloat(data.budgetGoal) || 0,
+        onboarding_completed: true,
       })
       .eq("user_id", user.id);
 
