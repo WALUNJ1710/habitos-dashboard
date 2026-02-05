@@ -1,231 +1,287 @@
- import { useState } from "react";
- import { Button } from "@/components/ui/button";
- import { Input } from "@/components/ui/input";
- import { Checkbox } from "@/components/ui/checkbox";
- import { Badge } from "@/components/ui/badge";
- import { Progress } from "@/components/ui/progress";
- import {
-   Select,
-   SelectContent,
-   SelectItem,
-   SelectTrigger,
-   SelectValue,
- } from "@/components/ui/select";
- import { Calendar } from "@/components/ui/calendar";
- import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
- import { format } from "date-fns";
- import { CalendarIcon, Plus, Trash2, Edit2, X, Check } from "lucide-react";
- import { cn } from "@/lib/utils";
- 
- interface Todo {
-   id: string;
-   title: string;
-   completed: boolean;
-   priority: "low" | "medium" | "high";
-   category: string;
-   dueDate?: Date;
- }
- 
- const categories = ["Work", "Personal", "Health", "Finance", "Learning"];
- 
- // Empty initial todos - user will add their own
- const initialTodos: Todo[] = [];
- 
- const TodoManager = () => {
-   const [todos, setTodos] = useState<Todo[]>(initialTodos);
-   const [newTodo, setNewTodo] = useState("");
-   const [newPriority, setNewPriority] = useState<"low" | "medium" | "high">("medium");
-   const [newCategory, setNewCategory] = useState("Personal");
-   const [newDueDate, setNewDueDate] = useState<Date>();
-   const [editingId, setEditingId] = useState<string | null>(null);
-   const [editText, setEditText] = useState("");
- 
-   const completedCount = todos.filter((t) => t.completed).length;
-   const progress = todos.length > 0 ? (completedCount / todos.length) * 100 : 0;
- 
-   const addTodo = () => {
-     if (!newTodo.trim()) return;
-     const todo: Todo = {
-       id: Date.now().toString(),
-       title: newTodo,
-       completed: false,
-       priority: newPriority,
-       category: newCategory,
-       dueDate: newDueDate,
-     };
-     setTodos([...todos, todo]);
-     setNewTodo("");
-     setNewDueDate(undefined);
-   };
- 
-   const toggleTodo = (id: string) => {
-     setTodos(todos.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)));
-   };
- 
-   const deleteTodo = (id: string) => {
-     setTodos(todos.filter((t) => t.id !== id));
-   };
- 
-   const startEdit = (todo: Todo) => {
-     setEditingId(todo.id);
-     setEditText(todo.title);
-   };
- 
-   const saveEdit = (id: string) => {
-     setTodos(todos.map((t) => (t.id === id ? { ...t, title: editText } : t)));
-     setEditingId(null);
-   };
- 
-   const getPriorityColor = (priority: string) => {
-     switch (priority) {
-       case "high": return "bg-destructive/20 text-destructive border-destructive/30";
-       case "medium": return "bg-warning/20 text-warning border-warning/30";
-       case "low": return "bg-success/20 text-success border-success/30";
-       default: return "";
-     }
-   };
- 
-   return (
-     <div className="space-y-6 animate-fade-in">
-       <div>
-         <h1 className="text-3xl font-bold">To-Do Manager</h1>
-         <p className="text-muted-foreground mt-1">Stay organized and productive</p>
-       </div>
- 
-       {/* Progress */}
-       <div className="glass-card rounded-xl p-6">
-         <div className="flex items-center justify-between mb-4">
-           <h3 className="font-semibold">Today's Progress</h3>
-           <span className="text-sm text-muted-foreground">{completedCount}/{todos.length} tasks</span>
-         </div>
-         <Progress value={progress} className="h-3" />
-       </div>
- 
-       {/* Add Todo */}
-       <div className="glass-card rounded-xl p-6">
-         <h3 className="font-semibold mb-4">Add New Task</h3>
-         <div className="flex flex-col sm:flex-row gap-4">
-           <Input
-             placeholder="What needs to be done?"
-             value={newTodo}
-             onChange={(e) => setNewTodo(e.target.value)}
-             onKeyPress={(e) => e.key === "Enter" && addTodo()}
-             className="flex-1 bg-secondary/50"
-           />
-           <Select value={newPriority} onValueChange={(v: any) => setNewPriority(v)}>
-             <SelectTrigger className="w-full sm:w-32 bg-secondary/50">
-               <SelectValue placeholder="Priority" />
-             </SelectTrigger>
-             <SelectContent>
-               <SelectItem value="low">Low</SelectItem>
-               <SelectItem value="medium">Medium</SelectItem>
-               <SelectItem value="high">High</SelectItem>
-             </SelectContent>
-           </Select>
-           <Select value={newCategory} onValueChange={setNewCategory}>
-             <SelectTrigger className="w-full sm:w-32 bg-secondary/50">
-               <SelectValue placeholder="Category" />
-             </SelectTrigger>
-             <SelectContent>
-               {categories.map((cat) => (
-                 <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-               ))}
-             </SelectContent>
-           </Select>
-           <Popover>
-             <PopoverTrigger asChild>
-               <Button variant="outline" className="w-full sm:w-auto bg-secondary/50">
-                 <CalendarIcon className="mr-2 h-4 w-4" />
-                 {newDueDate ? format(newDueDate, "PPP") : "Due date"}
-               </Button>
-             </PopoverTrigger>
-             <PopoverContent className="w-auto p-0" align="start">
-               <Calendar
-                 mode="single"
-                 selected={newDueDate}
-                 onSelect={setNewDueDate}
-                 initialFocus
-                 className="pointer-events-auto"
-               />
-             </PopoverContent>
-           </Popover>
-           <Button onClick={addTodo} className="bg-gradient-primary">
-             <Plus className="mr-2 h-4 w-4" /> Add
-           </Button>
-         </div>
-       </div>
- 
-       {/* Todo List */}
-       <div className="glass-card rounded-xl p-6">
-         <h3 className="font-semibold mb-4">Tasks</h3>
-         {todos.length > 0 ? (
-           <div className="space-y-3">
-             {todos.map((todo) => (
-             <div
-               key={todo.id}
-               className={cn(
-                 "flex items-center gap-4 p-4 rounded-lg bg-secondary/30 transition-all",
-                 todo.completed && "opacity-60"
-               )}
-             >
-               <Checkbox
-                 checked={todo.completed}
-                 onCheckedChange={() => toggleTodo(todo.id)}
-               />
-               <div className="flex-1 min-w-0">
-                 {editingId === todo.id ? (
-                   <div className="flex gap-2">
-                     <Input
-                       value={editText}
-                       onChange={(e) => setEditText(e.target.value)}
-                       className="bg-secondary"
-                       autoFocus
-                     />
-                     <Button size="icon" variant="ghost" onClick={() => saveEdit(todo.id)}>
-                       <Check className="h-4 w-4" />
-                     </Button>
-                     <Button size="icon" variant="ghost" onClick={() => setEditingId(null)}>
-                       <X className="h-4 w-4" />
-                     </Button>
-                   </div>
-                 ) : (
-                   <p className={cn("font-medium", todo.completed && "line-through")}>{todo.title}</p>
-                 )}
-                 <div className="flex items-center gap-2 mt-1">
-                   <Badge variant="outline" className={getPriorityColor(todo.priority)}>
-                     {todo.priority}
-                   </Badge>
-                   <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30">
-                     {todo.category}
-                   </Badge>
-                   {todo.dueDate && (
-                     <span className="text-xs text-muted-foreground">
-                       Due: {format(todo.dueDate, "MMM d")}
-                     </span>
-                   )}
-                 </div>
-               </div>
-               {editingId !== todo.id && (
-                 <div className="flex gap-1">
-                   <Button size="icon" variant="ghost" onClick={() => startEdit(todo)}>
-                     <Edit2 className="h-4 w-4" />
-                   </Button>
-                   <Button size="icon" variant="ghost" onClick={() => deleteTodo(todo.id)} className="text-destructive hover:text-destructive">
-                     <Trash2 className="h-4 w-4" />
-                   </Button>
-                 </div>
-               )}
-             </div>
-             ))}
-           </div>
-         ) : (
-           <div className="text-center py-8 text-muted-foreground">
-             <p>No tasks yet. Add your first task above to get started!</p>
-           </div>
-         )}
-       </div>
-     </div>
-   );
- };
- 
- export default TodoManager;
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import {
+  Plus,
+  Search,
+  Filter,
+  LayoutGrid,
+  List,
+  Target,
+  Calendar,
+  Loader2,
+} from "lucide-react";
+import { useTasks, Task } from "@/hooks/useTasks";
+import { TaskCard } from "@/components/todo/TaskCard";
+import { AddTaskDialog } from "@/components/todo/AddTaskDialog";
+import { KanbanBoard } from "@/components/todo/KanbanBoard";
+import { AIAssistant } from "@/components/todo/AIAssistant";
+
+type ViewMode = "list" | "kanban";
+type FilterStatus = "all" | "todo" | "in_progress" | "done";
+type FilterPriority = "all" | "low" | "medium" | "high" | "urgent";
+
+const TodoManager = () => {
+  const {
+    tasks,
+    subtasks,
+    categories,
+    loading,
+    addTask,
+    updateTask,
+    deleteTask,
+    addSubtask,
+    toggleSubtask,
+    deleteSubtask,
+  } = useTasks();
+
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
+  const [filterPriority, setFilterPriority] = useState<FilterPriority>("all");
+  const [activeTab, setActiveTab] = useState("all");
+
+  // Filter tasks
+  const filteredTasks = tasks.filter((task) => {
+    // Search filter
+    if (searchQuery && !task.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    // Status filter
+    if (filterStatus !== "all" && task.status !== filterStatus) {
+      return false;
+    }
+    // Priority filter
+    if (filterPriority !== "all" && task.priority !== filterPriority) {
+      return false;
+    }
+    // Tab filter
+    if (activeTab === "today") {
+      const today = new Date().toISOString().split("T")[0];
+      return task.due_date === today || task.is_focus_task;
+    }
+    if (activeTab === "upcoming") {
+      const today = new Date();
+      return task.due_date && new Date(task.due_date) > today;
+    }
+    return true;
+  });
+
+  // Calculate stats
+  const completedCount = tasks.filter((t) => t.status === "done").length;
+  const inProgressCount = tasks.filter((t) => t.status === "in_progress").length;
+  const progress = tasks.length > 0 ? (completedCount / tasks.length) * 100 : 0;
+
+  const handleToggleStatus = async (id: string, status: "todo" | "in_progress" | "done") => {
+    await updateTask(id, { 
+      status, 
+      completed_at: status === "done" ? new Date().toISOString() : null 
+    });
+  };
+
+  const handleAddTask = async (task: Partial<Task>) => {
+    await addTask(task);
+  };
+
+  const handleUpdateTask = async (id: string, task: Partial<Task>) => {
+    await updateTask(id, task);
+    setEditingTask(null);
+  };
+
+  const handleEdit = (task: Task) => {
+    setEditingTask(task);
+    setShowAddDialog(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6 animate-fade-in">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">To-Do Manager</h1>
+          <p className="text-muted-foreground mt-1">Stay organized and productive</p>
+        </div>
+        <div className="flex gap-2">
+          <AIAssistant />
+          <Button onClick={() => setShowAddDialog(true)} className="bg-gradient-primary">
+            <Plus className="mr-2 h-4 w-4" /> Add Task
+          </Button>
+        </div>
+      </div>
+
+      {/* Progress Card */}
+      <div className="glass-card rounded-xl p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold">Today's Progress</h3>
+          <div className="flex gap-4 text-sm">
+            <span className="text-muted-foreground">
+              <Badge variant="secondary" className="mr-1">{completedCount}</Badge> Done
+            </span>
+            <span className="text-muted-foreground">
+              <Badge variant="secondary" className="mr-1 bg-neon-blue/20">{inProgressCount}</Badge> In Progress
+            </span>
+            <span className="text-muted-foreground">
+              <Badge variant="secondary" className="mr-1">{tasks.length - completedCount - inProgressCount}</Badge> Todo
+            </span>
+          </div>
+        </div>
+        <Progress value={progress} className="h-3" />
+        <p className="text-sm text-muted-foreground mt-2">
+          {completedCount} of {tasks.length} tasks completed ({Math.round(progress)}%)
+        </p>
+      </div>
+
+      {/* Filters & Controls */}
+      <div className="glass-card rounded-xl p-4">
+        <div className="flex flex-col sm:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 bg-secondary/50"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as FilterStatus)}>
+              <SelectTrigger className="w-32 bg-secondary/50">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="todo">To Do</SelectItem>
+                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="done">Done</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filterPriority} onValueChange={(v) => setFilterPriority(v as FilterPriority)}>
+              <SelectTrigger className="w-32 bg-secondary/50">
+                <SelectValue placeholder="Priority" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Priority</SelectItem>
+                <SelectItem value="urgent">🔴 Urgent</SelectItem>
+                <SelectItem value="high">🟠 High</SelectItem>
+                <SelectItem value="medium">🟡 Medium</SelectItem>
+                <SelectItem value="low">🟢 Low</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <div className="flex border rounded-lg overflow-hidden">
+              <Button
+                variant={viewMode === "list" ? "secondary" : "ghost"}
+                size="icon"
+                onClick={() => setViewMode("list")}
+              >
+                <List className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "kanban" ? "secondary" : "ghost"}
+                size="icon"
+                onClick={() => setViewMode("kanban")}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="bg-secondary/50">
+          <TabsTrigger value="all" className="gap-2">
+            <Target className="h-4 w-4" /> All Tasks
+          </TabsTrigger>
+          <TabsTrigger value="today" className="gap-2">
+            🔥 Today's Focus
+          </TabsTrigger>
+          <TabsTrigger value="upcoming" className="gap-2">
+            <Calendar className="h-4 w-4" /> Upcoming
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value={activeTab} className="mt-4">
+          {viewMode === "kanban" ? (
+            <KanbanBoard
+              tasks={filteredTasks}
+              subtasks={subtasks}
+              categories={categories}
+              onToggleStatus={handleToggleStatus}
+              onDelete={deleteTask}
+              onEdit={handleEdit}
+              onAddSubtask={addSubtask}
+              onToggleSubtask={toggleSubtask}
+              onDeleteSubtask={deleteSubtask}
+            />
+          ) : (
+            <div className="glass-card rounded-xl p-6">
+              {filteredTasks.length > 0 ? (
+                <div className="space-y-3">
+                  {filteredTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      subtasks={subtasks}
+                      category={categories.find((c) => c.id === task.category_id)}
+                      onToggle={(status) => handleToggleStatus(task.id, status)}
+                      onDelete={() => deleteTask(task.id)}
+                      onEdit={() => handleEdit(task)}
+                      onAddSubtask={(title) => addSubtask(task.id, title)}
+                      onToggleSubtask={toggleSubtask}
+                      onDeleteSubtask={deleteSubtask}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12 text-muted-foreground">
+                  <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p className="text-lg font-medium">No tasks found</p>
+                  <p className="text-sm">Add your first task to get started!</p>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
+
+      {/* Add/Edit Task Dialog */}
+      <AddTaskDialog
+        open={showAddDialog}
+        onOpenChange={(open) => {
+          setShowAddDialog(open);
+          if (!open) setEditingTask(null);
+        }}
+        categories={categories}
+        onAdd={handleAddTask}
+        editTask={editingTask}
+        onUpdate={handleUpdateTask}
+      />
+    </div>
+  );
+};
+
+export default TodoManager;
