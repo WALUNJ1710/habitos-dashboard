@@ -1,5 +1,6 @@
  import { StatCard } from "@/components/dashboard/StatCard";
  import { useUserProfile } from "@/components/dashboard/DashboardLayout";
+ import { formatCurrency, getCurrencySymbol } from "@/lib/currency";
  import {
    CheckCircle2,
    Flame,
@@ -103,8 +104,8 @@
          />
          <StatCard
            title="Money Spent"
-           value="$0.00"
-           subtitle={`of $${profile.budgetGoal || 0} monthly budget`}
+           value={formatCurrency(0)}
+           subtitle={`of ${formatCurrency(profile.budgetGoal || 0)} monthly budget`}
            icon={Wallet}
            iconClassName="bg-warning"
          />
@@ -199,7 +200,7 @@
              </div>
              <div className="flex items-center gap-2">
                <div className="w-3 h-3 rounded-full bg-neon-purple" />
-               <span className="text-sm text-muted-foreground">Spending ($)</span>
+               <span className="text-sm text-muted-foreground">Spending ({getCurrencySymbol()})</span>
              </div>
            </div>
          </div>

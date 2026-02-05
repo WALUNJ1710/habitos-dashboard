@@ -10,6 +10,7 @@
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
  import { Scale, Ruler, Target, Wallet, Utensils, ArrowRight, ArrowLeft, Check } from "lucide-react";
+ import { getCurrencySymbol } from "@/lib/currency";
  
  interface OnboardingModalProps {
    open: boolean;
@@ -181,12 +182,12 @@
                <div className="space-y-2">
                  <Label htmlFor="budgetGoal" className="flex items-center gap-2">
                    <Wallet className="h-4 w-4 text-primary" />
-                   Monthly Budget Goal ($)
+                   Monthly Budget Goal ({getCurrencySymbol()})
                  </Label>
                  <Input
                    id="budgetGoal"
                    type="number"
-                   placeholder="e.g., 1500"
+                   placeholder="e.g., 50000"
                    value={data.budgetGoal}
                    onChange={(e) => setData({ ...data, budgetGoal: e.target.value })}
                    className="bg-secondary/50"
