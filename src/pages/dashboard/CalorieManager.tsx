@@ -1,3 +1,4 @@
+ import { useUserProfile } from "@/components/dashboard/DashboardLayout";
  import { useState } from "react";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -27,24 +28,17 @@
    type: string;
  }
  
- const initialFoods: FoodEntry[] = [
-   { id: "1", name: "Oatmeal with berries", calories: 350, meal: "Breakfast" },
-   { id: "2", name: "Grilled chicken salad", calories: 450, meal: "Lunch" },
-   { id: "3", name: "Protein shake", calories: 200, meal: "Snacks" },
-   { id: "4", name: "Salmon with vegetables", calories: 550, meal: "Dinner" },
- ];
- 
- const initialActivities: ActivityEntry[] = [
-   { id: "1", name: "Morning run", calories: 300, type: "Running" },
-   { id: "2", name: "Weight training", calories: 200, type: "Gym" },
- ];
+ // Empty initial data - user will add their entries
+ const initialFoods: FoodEntry[] = [];
+ const initialActivities: ActivityEntry[] = [];
  
  const CalorieManager = () => {
+   const { profile } = useUserProfile();
    const [foods, setFoods] = useState<FoodEntry[]>(initialFoods);
    const [activities, setActivities] = useState<ActivityEntry[]>(initialActivities);
    const [newFood, setNewFood] = useState({ name: "", calories: "", meal: "Breakfast" });
    const [newActivity, setNewActivity] = useState({ name: "", calories: "", type: "Walking" });
-   const calorieGoal = 2200;
+   const calorieGoal = profile.calorieGoal || 0;
  
    const totalConsumed = foods.reduce((sum, f) => sum + f.calories, 0);
    const totalBurned = activities.reduce((sum, a) => sum + a.calories, 0);

@@ -1,4 +1,5 @@
- import { useState } from "react";
+ import { useState, useEffect } from "react";
+ import { useUserProfile } from "@/components/dashboard/DashboardLayout";
  import { useNavigate } from "react-router-dom";
  import { supabase } from "@/integrations/supabase/client";
  import { Button } from "@/components/ui/button";
@@ -9,16 +10,33 @@
  import { User, Target, Wallet, Sun, Moon, LogOut, Save } from "lucide-react";
  
  const Settings = () => {
+   const { profile: userProfile, setProfile: setUserProfile } = useUserProfile();
    const [profile, setProfile] = useState({
-     fullName: "John Doe",
-     email: "john@example.com",
-     calorieGoal: "2200",
-     budgetGoal: "2000",
+     fullName: "",
+     email: "",
+     calorieGoal: "0",
+     budgetGoal: "0",
    });
    const [darkMode, setDarkMode] = useState(true);
    const [loading, setLoading] = useState(false);
    const { toast } = useToast();
    const navigate = useNavigate();
+ 
+   useEffect(() => {
+     // Load profile from context
+     setProfile({
+       fullName: userProfile.fullName || "",
+       email: "",
+       calorieGoal: userProfile.calorieGoal?.toString() || "0",
+       budgetGoal: userProfile.budgetGoal?.toString() || "0",
+     });
+     // Get email from supabase session
+     supabase.auth.getUser().then(({ data }) => {
+       if (data.user?.email) {
+         setProfile((prev) => ({ ...prev, email: data.user!.email! }));
+       }
+     });
+   }, [userProfile]);
  
    const handleSignOut = async () => {
      await supabase.auth.signOut();
@@ -27,13 +45,29 @@
  
    const handleSave = () => {
      setLoading(true);
-     setTimeout(() => {
+     // Update user profile context
+     setUserProfile({
+       ...userProfile,
+       fullName: profile.fullName,
+       calorieGoal: parseFloat(profile.calorieGoal) || 0,
+       budgetGoal: parseFloat(profile.budgetGoal) || 0,
+     });
+     // Save to localStorage
+     supabase.auth.getUser().then(({ data }) => {
+       if (data.user) {
+         localStorage.setItem(`habitos_profile_${data.user.id}`, JSON.stringify({
+           ...userProfile,
+           fullName: profile.fullName,
+           calorieGoal: parseFloat(profile.calorieGoal) || 0,
+           budgetGoal: parseFloat(profile.budgetGoal) || 0,
+         }));
+       }
        setLoading(false);
        toast({
          title: "Settings saved",
          description: "Your preferences have been updated.",
        });
-     }, 1000);
+       });
    };
  
    return (
