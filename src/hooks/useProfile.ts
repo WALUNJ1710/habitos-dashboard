@@ -17,6 +17,7 @@ export interface Profile {
   xp_points: number;
   level: number;
   notifications_enabled: boolean;
+  onboarding_completed: boolean;
 }
 
 export const useProfile = (user: User | null) => {
