@@ -1,3 +1,4 @@
+ import { useUserProfile } from "@/components/dashboard/DashboardLayout";
  import { useState } from "react";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
@@ -47,13 +48,8 @@
    { value: "netbanking", label: "Net Banking", icon: Building },
  ];
  
- const initialExpenses: Expense[] = [
-   { id: "1", amount: 25, category: "Food", paymentMethod: "upi", date: new Date(), notes: "Lunch" },
-   { id: "2", amount: 50, category: "Travel", paymentMethod: "cash", date: new Date(), notes: "Uber ride" },
-   { id: "3", amount: 120, category: "Shopping", paymentMethod: "credit", date: new Date(Date.now() - 86400000), notes: "Clothes" },
-   { id: "4", amount: 45, category: "Entertainment", paymentMethod: "debit", date: new Date(Date.now() - 86400000 * 2), notes: "Movie tickets" },
-   { id: "5", amount: 200, category: "Bills", paymentMethod: "netbanking", date: new Date(Date.now() - 86400000 * 3), notes: "Electricity" },
- ];
+ // Empty initial data - user will add their expenses
+ const initialExpenses: Expense[] = [];
  
  const categoryColors: Record<string, string> = {
    Food: "hsl(24, 95%, 53%)",
@@ -66,6 +62,7 @@
  };
  
  const BudgetTracker = () => {
+   const { profile } = useUserProfile();
    const [expenses, setExpenses] = useState<Expense[]>(initialExpenses);
    const [newExpense, setNewExpense] = useState({
      amount: "",
@@ -75,7 +72,7 @@
      notes: "",
    });
  
-   const totalBudget = 2000;
+   const totalBudget = profile.budgetGoal || 0;
    const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
    const remaining = totalBudget - totalSpent;
  

@@ -1,4 +1,5 @@
  import { StatCard } from "@/components/dashboard/StatCard";
+ import { useUserProfile } from "@/components/dashboard/DashboardLayout";
  import {
    CheckCircle2,
    Flame,
@@ -22,53 +23,56 @@
    Area,
  } from "recharts";
  
+ // Empty weekly data - will be populated as user logs activities
  const weeklyData = [
-   { day: "Mon", tasks: 5, calories: 1800, spending: 25 },
-   { day: "Tue", tasks: 8, calories: 2100, spending: 45 },
-   { day: "Wed", tasks: 6, calories: 1950, spending: 30 },
-   { day: "Thu", tasks: 9, calories: 2200, spending: 60 },
-   { day: "Fri", tasks: 7, calories: 2000, spending: 80 },
-   { day: "Sat", tasks: 4, calories: 2400, spending: 120 },
-   { day: "Sun", tasks: 3, calories: 2100, spending: 40 },
+   { day: "Mon", tasks: 0, calories: 0, spending: 0 },
+   { day: "Tue", tasks: 0, calories: 0, spending: 0 },
+   { day: "Wed", tasks: 0, calories: 0, spending: 0 },
+   { day: "Thu", tasks: 0, calories: 0, spending: 0 },
+   { day: "Fri", tasks: 0, calories: 0, spending: 0 },
+   { day: "Sat", tasks: 0, calories: 0, spending: 0 },
+   { day: "Sun", tasks: 0, calories: 0, spending: 0 },
  ];
  
  const DashboardOverview = () => {
+   const { profile } = useUserProfile();
+ 
    return (
      <div className="space-y-6 animate-fade-in">
        <div>
          <h1 className="text-3xl font-bold">Dashboard</h1>
-         <p className="text-muted-foreground mt-1">Welcome back! Here's your daily overview.</p>
+         <p className="text-muted-foreground mt-1">
+           Welcome back{profile.fullName ? `, ${profile.fullName}` : ""}! Here's your daily overview.
+         </p>
        </div>
  
        {/* Stats Grid */}
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
          <StatCard
            title="Tasks Completed"
-           value="7/10"
+           value="0/0"
            subtitle="Today's progress"
            icon={CheckCircle2}
-           trend={{ value: 12, isPositive: true }}
            iconClassName="bg-gradient-primary"
          />
          <StatCard
            title="Current Streak"
-           value="15 🔥"
+           value="0 🔥"
            subtitle="Days in a row"
            icon={Flame}
            iconClassName="bg-neon-orange"
          />
          <StatCard
            title="Weight"
-           value="72.5 kg"
-           subtitle="BMI: 23.4"
+           value={profile.weight ? `${profile.weight} kg` : "-- kg"}
+           subtitle={profile.weight && profile.height ? `BMI: ${(profile.weight / Math.pow(profile.height / 100, 2)).toFixed(1)}` : "Set your measurements"}
            icon={Scale}
-           trend={{ value: 2, isPositive: true }}
            iconClassName="bg-neon-purple"
          />
          <StatCard
            title="Daily Activity"
-           value="Active"
-           subtitle="8,432 steps"
+           value="--"
+           subtitle="0 steps"
            icon={Activity}
            iconClassName="bg-neon-green"
          />
@@ -78,31 +82,30 @@
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
          <StatCard
            title="Calories Consumed"
-           value="1,850"
-           subtitle="of 2,200 goal"
+           value="0"
+           subtitle={`of ${profile.calorieGoal || 0} goal`}
            icon={Utensils}
            iconClassName="bg-neon-cyan"
          />
          <StatCard
            title="Calories Burned"
-           value="420"
+           value="0"
            subtitle="Today's workout"
            icon={Dumbbell}
            iconClassName="bg-neon-pink"
          />
          <StatCard
            title="Remaining"
-           value="770 cal"
+           value={`${profile.calorieGoal || 0} cal`}
            subtitle="Stay on track!"
            icon={Target}
            iconClassName="bg-gradient-success"
          />
          <StatCard
            title="Money Spent"
-           value="$45.00"
-           subtitle="of $100 daily budget"
+           value="$0.00"
+           subtitle={`of $${profile.budgetGoal || 0} monthly budget`}
            icon={Wallet}
-           trend={{ value: 15, isPositive: false }}
            iconClassName="bg-warning"
          />
        </div>

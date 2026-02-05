@@ -1,4 +1,5 @@
  import { useState } from "react";
+ import { useUserProfile } from "@/components/dashboard/DashboardLayout";
  import { Button } from "@/components/ui/button";
  import { Input } from "@/components/ui/input";
  import { Label } from "@/components/ui/label";
@@ -14,23 +15,14 @@
    ReferenceLine,
  } from "recharts";
  
- const weightHistory = [
-   { date: "Jan 1", weight: 78 },
-   { date: "Jan 8", weight: 77.5 },
-   { date: "Jan 15", weight: 77 },
-   { date: "Jan 22", weight: 76.2 },
-   { date: "Jan 29", weight: 75.8 },
-   { date: "Feb 5", weight: 75 },
-   { date: "Feb 12", weight: 74.5 },
-   { date: "Feb 19", weight: 74 },
-   { date: "Feb 26", weight: 73.5 },
-   { date: "Mar 5", weight: 72.5 },
- ];
- 
  const HealthTracker = () => {
-   const [weight, setWeight] = useState("72.5");
-   const [height, setHeight] = useState("176");
-   const [goalWeight, setGoalWeight] = useState("70");
+   const { profile, setProfile } = useUserProfile();
+   const [weight, setWeight] = useState(profile.weight?.toString() || "0");
+   const [height, setHeight] = useState(profile.height?.toString() || "0");
+   const [goalWeight, setGoalWeight] = useState(profile.goalWeight?.toString() || "0");
+ 
+   // Empty weight history - will be populated as user logs data
+   const weightHistory: { date: string; weight: number }[] = [];
  
    const currentWeight = parseFloat(weight) || 0;
    const heightInM = (parseFloat(height) || 176) / 100;
@@ -133,7 +125,19 @@
              />
            </div>
            <div className="flex items-end">
-             <Button className="w-full bg-gradient-primary">Save</Button>
+             <Button 
+               className="w-full bg-gradient-primary"
+               onClick={() => {
+                 setProfile({
+                   ...profile,
+                   weight: parseFloat(weight) || 0,
+                   height: parseFloat(height) || 0,
+                   goalWeight: parseFloat(goalWeight) || 0,
+                 });
+               }}
+             >
+               Save
+             </Button>
            </div>
          </div>
        </div>
@@ -145,47 +149,57 @@
              <h3 className="font-semibold">Weight History</h3>
              <p className="text-sm text-muted-foreground">Your progress over time</p>
            </div>
-           <div className="flex items-center gap-2 text-success">
-             <TrendingDown className="h-5 w-5" />
-             <span className="font-medium">-5.5 kg</span>
+           {weightHistory.length > 1 && (
+             <div className="flex items-center gap-2 text-success">
+               <TrendingDown className="h-5 w-5" />
+               <span className="font-medium">
+                 {(weightHistory[0]?.weight - weightHistory[weightHistory.length - 1]?.weight).toFixed(1)} kg
+               </span>
+             </div>
+           )}
+         </div>
+         {weightHistory.length > 0 ? (
+           <div className="h-80">
+             <ResponsiveContainer width="100%" height="100%">
+               <LineChart data={weightHistory}>
+                 <defs>
+                   <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
+                     <stop offset="5%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0.3} />
+                     <stop offset="95%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0} />
+                   </linearGradient>
+                 </defs>
+                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(217, 33%, 22%)" />
+                 <XAxis dataKey="date" stroke="hsl(215, 20%, 65%)" fontSize={12} />
+                 <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="hsl(215, 20%, 65%)" fontSize={12} />
+                 <Tooltip
+                   contentStyle={{
+                     backgroundColor: "hsl(222, 47%, 14%)",
+                     border: "1px solid hsl(217, 33%, 22%)",
+                     borderRadius: "8px",
+                   }}
+                 />
+                 <ReferenceLine
+                   y={goalWeightNum}
+                   stroke="hsl(142, 76%, 45%)"
+                   strokeDasharray="5 5"
+                   label={{ value: "Goal", fill: "hsl(142, 76%, 45%)", fontSize: 12 }}
+                 />
+                 <Line
+                   type="monotone"
+                   dataKey="weight"
+                   stroke="hsl(262, 83%, 58%)"
+                   strokeWidth={3}
+                   dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 2 }}
+                   activeDot={{ r: 6, fill: "hsl(262, 83%, 58%)" }}
+                 />
+               </LineChart>
+             </ResponsiveContainer>
            </div>
-         </div>
-         <div className="h-80">
-           <ResponsiveContainer width="100%" height="100%">
-             <LineChart data={weightHistory}>
-               <defs>
-                 <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
-                   <stop offset="5%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0.3} />
-                   <stop offset="95%" stopColor="hsl(262, 83%, 58%)" stopOpacity={0} />
-                 </linearGradient>
-               </defs>
-               <CartesianGrid strokeDasharray="3 3" stroke="hsl(217, 33%, 22%)" />
-               <XAxis dataKey="date" stroke="hsl(215, 20%, 65%)" fontSize={12} />
-               <YAxis domain={['dataMin - 2', 'dataMax + 2']} stroke="hsl(215, 20%, 65%)" fontSize={12} />
-               <Tooltip
-                 contentStyle={{
-                   backgroundColor: "hsl(222, 47%, 14%)",
-                   border: "1px solid hsl(217, 33%, 22%)",
-                   borderRadius: "8px",
-                 }}
-               />
-               <ReferenceLine
-                 y={goalWeightNum}
-                 stroke="hsl(142, 76%, 45%)"
-                 strokeDasharray="5 5"
-                 label={{ value: "Goal", fill: "hsl(142, 76%, 45%)", fontSize: 12 }}
-               />
-               <Line
-                 type="monotone"
-                 dataKey="weight"
-                 stroke="hsl(262, 83%, 58%)"
-                 strokeWidth={3}
-                 dot={{ fill: "hsl(262, 83%, 58%)", strokeWidth: 2 }}
-                 activeDot={{ r: 6, fill: "hsl(262, 83%, 58%)" }}
-               />
-             </LineChart>
-           </ResponsiveContainer>
-         </div>
+         ) : (
+           <div className="h-80 flex items-center justify-center text-muted-foreground">
+             <p>No weight history yet. Start logging your weight to see progress!</p>
+           </div>
+         )}
        </div>
  
        {/* BMI Scale */}

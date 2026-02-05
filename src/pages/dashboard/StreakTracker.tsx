@@ -12,14 +12,8 @@
    longestStreak: number;
  }
  
- const initialHabits: Habit[] = [
-   { id: "1", name: "Morning meditation", completed: true, streak: 15, longestStreak: 30 },
-   { id: "2", name: "Exercise", completed: true, streak: 15, longestStreak: 45 },
-   { id: "3", name: "Read 30 minutes", completed: false, streak: 8, longestStreak: 21 },
-   { id: "4", name: "Drink 8 glasses of water", completed: true, streak: 15, longestStreak: 60 },
-   { id: "5", name: "No social media before noon", completed: false, streak: 3, longestStreak: 14 },
-   { id: "6", name: "Journal before bed", completed: true, streak: 15, longestStreak: 30 },
- ];
+ // Empty initial habits - user will add their own
+ const initialHabits: Habit[] = [];
  
  // Generate calendar heatmap data
  const generateHeatmapData = () => {
@@ -56,7 +50,8 @@
      ));
    };
  
-   const totalStreak = Math.max(...habits.map((h) => h.streak));
+   const totalStreak = habits.length > 0 ? Math.max(...habits.map((h) => h.streak)) : 0;
+   const longestStreak = habits.length > 0 ? Math.max(...habits.map((h) => h.longestStreak)) : 0;
    const completedToday = habits.filter((h) => h.completed).length;
  
    return (
@@ -83,7 +78,7 @@
            </div>
            <div>
              <p className="text-sm text-muted-foreground">Longest Streak</p>
-             <p className="text-2xl font-bold">60 days</p>
+             <p className="text-2xl font-bold">{longestStreak} days</p>
            </div>
          </div>
          <div className="glass-card rounded-xl p-5 flex items-center gap-4">
@@ -101,7 +96,7 @@
            </div>
            <div>
              <p className="text-sm text-muted-foreground">Completion Rate</p>
-             <p className="text-2xl font-bold">87%</p>
+             <p className="text-2xl font-bold">{habits.length > 0 ? Math.round((completedToday / habits.length) * 100) : 0}%</p>
            </div>
          </div>
        </div>
@@ -109,8 +104,9 @@
        {/* Daily Habits */}
        <div className="glass-card rounded-xl p-6">
          <h3 className="font-semibold mb-4">Today's Habits</h3>
-         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           {habits.map((habit) => (
+         {habits.length > 0 ? (
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+             {habits.map((habit) => (
              <div
                key={habit.id}
                className={cn(
@@ -137,8 +133,13 @@
                  </div>
                </div>
              </div>
-           ))}
-         </div>
+             ))}
+           </div>
+         ) : (
+           <div className="text-center py-8 text-muted-foreground">
+             <p>No habits added yet. Add your first habit to start tracking!</p>
+           </div>
+         )}
        </div>
  
        {/* Calendar Heatmap */}

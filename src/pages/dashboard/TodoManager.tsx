@@ -28,13 +28,8 @@
  
  const categories = ["Work", "Personal", "Health", "Finance", "Learning"];
  
- const initialTodos: Todo[] = [
-   { id: "1", title: "Complete project presentation", completed: false, priority: "high", category: "Work", dueDate: new Date() },
-   { id: "2", title: "Go to the gym", completed: true, priority: "medium", category: "Health" },
-   { id: "3", title: "Read 30 pages", completed: false, priority: "low", category: "Learning" },
-   { id: "4", title: "Pay electricity bill", completed: false, priority: "high", category: "Finance", dueDate: new Date(Date.now() + 86400000 * 2) },
-   { id: "5", title: "Call mom", completed: true, priority: "medium", category: "Personal" },
- ];
+ // Empty initial todos - user will add their own
+ const initialTodos: Todo[] = [];
  
  const TodoManager = () => {
    const [todos, setTodos] = useState<Todo[]>(initialTodos);
@@ -46,7 +41,7 @@
    const [editText, setEditText] = useState("");
  
    const completedCount = todos.filter((t) => t.completed).length;
-   const progress = (completedCount / todos.length) * 100;
+   const progress = todos.length > 0 ? (completedCount / todos.length) * 100 : 0;
  
    const addTodo = () => {
      if (!newTodo.trim()) return;
@@ -163,8 +158,9 @@
        {/* Todo List */}
        <div className="glass-card rounded-xl p-6">
          <h3 className="font-semibold mb-4">Tasks</h3>
-         <div className="space-y-3">
-           {todos.map((todo) => (
+         {todos.length > 0 ? (
+           <div className="space-y-3">
+             {todos.map((todo) => (
              <div
                key={todo.id}
                className={cn(
@@ -220,8 +216,13 @@
                  </div>
                )}
              </div>
-           ))}
-         </div>
+             ))}
+           </div>
+         ) : (
+           <div className="text-center py-8 text-muted-foreground">
+             <p>No tasks yet. Add your first task above to get started!</p>
+           </div>
+         )}
        </div>
      </div>
    );
